@@ -99,19 +99,19 @@ static int days_in_month(int m, int y) {
     return d[m - 1];
 }
 
-/* Reads the date as one line: MM DD YYYY. Keeps asking until it is a real date */
+/* Reads the date as one line: MM/DD/YYYY. Keeps asking until it is a real date */   
 static void read_date(JournalEntry *e) {
     char buf[100], extra;
     while (1) {
-        printf("Date (MM DD YYYY): ");
+        printf("Date (MM/DD/YYYY): ");
         read_line(buf, sizeof(buf));
-        if (sscanf(buf, "%d %d %d %c", &e->month, &e->day, &e->year, &extra) == 3
+        if (sscanf(buf, "%d/%d/%d %c", &e->month, &e->day, &e->year, &extra) == 3 
             && e->month >= 1 && e->month <= 12
             && e->year >= 1900 && e->year <= 2100
             && e->day >= 1 && e->day <= days_in_month(e->month, e->year)) {
             return;
         }
-        printf("Invalid date. Use MM DD YYYY (example: 03 15 2026).\n");
+        printf("Invalid date. Use MM/DD/YYYY (example: 03/15/2026).\n");
     }
 }
 
