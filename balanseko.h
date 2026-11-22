@@ -2,6 +2,7 @@
 #define BALANSEKO_H
 
 #define MAX_ENTRIES 200
+#define MAX_AMOUNT 1000000000000000LL
 
 /* Fixed Account Structure*/
 typedef struct {
@@ -15,9 +16,9 @@ typedef struct {
     int month, day, year;
     char description[50];
     int debit_code;
-    float debit_amount;
+    long long debit_amount;
     int credit_code;
-    float credit_amount;
+    long long credit_amount;
 } JournalEntry;
 
 /* Main System Struct */

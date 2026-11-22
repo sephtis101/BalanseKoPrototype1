@@ -27,14 +27,15 @@ int read_int(const char *prompt, int min, int max) {
 }
 
 /* Keeps asking until the user types a positive amount */
-static float read_amount(const char *prompt) {
-    char buf[100], extra;
-    float n;
+static long long read_amount(const char *prompt) {
+    char buf[100], *end;
+    long long n;
     while (1) {
         printf("%s", prompt);
         read_line(buf, sizeof(buf));
-        if (sscanf(buf, "%f %c", &n, &extra) == 1 && n > 0 && n <= 1000000000.0f) return n;
-        printf("Invalid amount. Enter a number greater than 0.\n");
+              n = strtoll(buf, &end, 10);   /* end points to the first character that is not a digit */
+      if (end != buf && (*end == '\n' || *end == '\0') && n > 0 && n <= MAX_AMOUNT) return n;
+        printf("Invalid amount. Enter a whole number from 1 to %lld.\n", MAX_AMOUNT);
     }
 }
 
@@ -164,7 +165,7 @@ static int input_entry(BalanseKoSystem *sys, JournalEntry *e) {
     e->credit_amount = read_amount("Credit Amount: ");
 
     if (e->debit_amount != e->credit_amount) {
-        printf("Error: Debits (%.2f) must equal Credits (%.2f). Entry cancelled.\n",
+        printf("Error: Debits (%.lld) must equal Credits (%.lld). Entry cancelled.\n",
                e->debit_amount, e->credit_amount);
         return 0;
     }
@@ -197,8 +198,8 @@ void view_journal(BalanseKoSystem *sys) {
     for (int i = 0; i < sys->entry_count; i++) {
         JournalEntry e = sys->entries[i];
         printf("\n#%d | Date: %02d/%02d/%04d | Desc: %s\n", i + 1, e.month, e.day, e.year, e.description);
-        printf("  Debit:  %s - %.2f\n", get_account_name(sys, e.debit_code), e.debit_amount);
-        printf("  Credit: %s - %.2f\n", get_account_name(sys, e.credit_code), e.credit_amount);
+        printf("  Debit:  %s - %.lld\n", get_account_name(sys, e.debit_code), e.debit_amount);
+        printf("  Credit: %s - %.lld\n", get_account_name(sys, e.credit_code), e.credit_amount);
     }
 }
 
@@ -250,17 +251,17 @@ void manage_entries(BalanseKoSystem *sys) {
 /* ---------- TRIAL BALANCE ---------- */
 
 void view_trial_balance(BalanseKoSystem *sys) {
-    float total_debits = 0;
-    float total_credits = 0;
+    long long total_debits = 0;
+    long long total_credits = 0;
 
     printf("\n--- TRIAL BALANCE ---\n");
     printf("%-20s | %-10s | %-10s\n", "Account", "Debit", "Credit");
-    printf("------------------------------------------------\n");
+    printf("--------------------------------------------------------------\n");
 
     for (int i = 0; i < 9; i++) {
         int code = sys->chart[i].code;
-        float acc_debit = 0;
-        float acc_credit = 0;
+        long long acc_debit = 0;
+        long long acc_credit = 0;
 
         /*Loop through all entries and sum up amounts for this account*/
         for (int j = 0; j < sys->entry_count; j++) {
@@ -268,22 +269,22 @@ void view_trial_balance(BalanseKoSystem *sys) {
             if (sys->entries[j].credit_code == code) acc_credit += sys->entries[j].credit_amount;
         }
 
-        float balance = acc_debit - acc_credit;
+        long long balance = acc_debit - acc_credit;
         if (sys->chart[i].is_debit_normal == 0) { /*If normal credit, invert*/
             balance = acc_credit - acc_debit;
         }
 
-        if (balance > 0.004f || balance < -0.004f) {
+        if (balance != 0) {
             if (sys->chart[i].is_debit_normal == 1) {
-                printf("%-20s | %-10.2f | %-10s\n", sys->chart[i].name, balance, "");
+                printf("%-20s | %-18lld | %-18s\n", sys->chart[i].name, balance, "");
                 total_debits += balance;
             } else {
-                printf("%-20s | %-10s | %-10.2f\n", sys->chart[i].name, "", balance);
+                printf("%-20s | %-18s | %-18lld\n", sys->chart[i].name, "", balance);
                 total_credits += balance;
             }
         }
     }
 
-    printf("------------------------------------------------\n");
-    printf("%-20s | %-10.2f | %-10.2f\n", "TOTAL", total_debits, total_credits);
+    printf("--------------------------------------------------------------\n");
+    printf("%-20s | %-18lld | %-18lld\n", "TOTAL", total_debits, total_credits);
 }
