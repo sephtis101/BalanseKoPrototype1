@@ -1,8 +1,22 @@
 #include <stdio.h>
 #include "balanseko.h"
 
-/* Shows the BalanseKo header design */
-void print_header(void) {
+/* Function Prototypes (all of them take the system by pointer = pass by reference) */
+void print_main_menu(void);
+void run_choice(BalanseKoSystem *sys, int choice);
+void run_main_menu(BalanseKoSystem *sys);
+
+int main() {
+    BalanseKoSystem sys;
+
+    init_system(&sys);
+    run_main_menu(&sys);  /* The whole program runs inside this function */
+
+    return 0;
+}
+
+/* Output: shows the main menu */
+void print_main_menu(void) {
     printf("\n==========================================================\n");
     printf("  ____          _                            _  __\n");
     printf(" | __ )   __ _ | |  __ _  _ __    ___   ___ | |/ /  ___\n");
@@ -11,34 +25,39 @@ void print_header(void) {
     printf(" |____/  \\__,_||_| \\__,_||_| |_| |___/ \\___||_|\\_\\ \\___/\n");
     printf("           Simple Journal & Bookkeeping System\n");
     printf("==========================================================\n");
+    printf(" 1. View Chart of Accounts\n");
+    printf(" 2. Add Journal Entry\n");
+    printf(" 3. Edit / Delete Journal Entry\n");
+    printf(" 4. View General Journal\n");
+    printf(" 5. View Trial Balance\n");
+    printf(" 0. Exit\n");
+    printf("----------------------------------------------------------\n");
 }
 
-int main() {
-    BalanseKoSystem sys;
-    int choice;
+/* Process: runs the chosen menu ONE time */
+void run_choice(BalanseKoSystem *sys, int choice) {
+    switch (choice) {
+        case 1: show_chart(sys); break;
+        case 2: add_entry(sys); break;
+        case 3: manage_entries(sys); break;
+        case 4: view_journal(sys); break;
+        case 5: view_trial_balance(sys); break;
+    }
+}
 
-    init_system(&sys);
+void run_main_menu(BalanseKoSystem *sys) {
+    int choice = -1;
 
-    do {
-        print_header();
-        printf(" 1. View Chart of Accounts\n");
-        printf(" 2. Add Journal Entry\n");
-        printf(" 3. Edit / Delete Journal Entry\n");
-        printf(" 4. View General Journal\n");
-        printf(" 5. View Trial Balance\n");
-        printf(" 0. Exit\n");
-        printf("----------------------------------------------------------\n");
+    while (choice != 0) {
+        print_main_menu();
         choice = read_int("Choice: ", 0, 5);
 
-        switch(choice) {
-            case 1: show_chart(&sys); break;
-            case 2: add_entry(&sys); break;
-            case 3: manage_entries(&sys); break;
-            case 4: view_journal(&sys); break;
-            case 5: view_trial_balance(&sys); break;
-            case 0: printf("Goodbye!\n"); break;
+        if (choice == 0) {
+            printf("Thank you for using BalanseKo Services developed by Accounting Divas.\n");
+        } else {
+            run_choice(sys, choice);
         }
-    } while(choice != 0);
-
-    return 0;
+    }
 }
+
+
