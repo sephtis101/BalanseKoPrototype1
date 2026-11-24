@@ -83,6 +83,21 @@ static const char *get_account_name(BalanseKoSystem *sys, int code) {
     return sys->chart[i].name;
 }
 
+/* Balance of one account (by its position in the chart), on its normal side */
+static long long account_balance(BalanseKoSystem *sys, int i) {
+    int code = sys->chart[i].code;
+    long long debit = 0;
+    long long credit = 0;
+
+    for (int j = 9; j < sys->entry_count; j++) {
+        if (sys->entries[j].debit_code == code) debit += sys->entries[j].debit_amount;
+        if (sys->entries[j].credit_code == code) debit += sys->entries[j].credit_amount;
+    }
+
+    if (sys->chart[i].is_debit_normal == 1) return debit - credit;
+    return credit - debit;
+}
+
 /* Keeps asking until the user types a code that exists in the chart */
 static int read_account(BalanseKoSystem *sys, const char *prompt) {
     int code;
@@ -259,20 +274,7 @@ void view_trial_balance(BalanseKoSystem *sys) {
     printf("--------------------------------------------------------------\n");
 
     for (int i = 0; i < 9; i++) {
-        int code = sys->chart[i].code;
-        long long acc_debit = 0;
-        long long acc_credit = 0;
-
-        /*Loop through all entries and sum up amounts for this account*/
-        for (int j = 0; j < sys->entry_count; j++) {
-            if (sys->entries[j].debit_code == code) acc_debit += sys->entries[j].debit_amount;
-            if (sys->entries[j].credit_code == code) acc_credit += sys->entries[j].credit_amount;
-        }
-
-        long long balance = acc_debit - acc_credit;
-        if (sys->chart[i].is_debit_normal == 0) { /*If normal credit, invert*/
-            balance = acc_credit - acc_debit;
-        }
+        long long balance = account_balance(sys, i);
 
         if (balance != 0) {
             if (sys->chart[i].is_debit_normal == 1) {
