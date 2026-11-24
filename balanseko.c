@@ -54,8 +54,8 @@ static void read_text(const char *prompt, char *out, int size) {
     }
 }
 
-/* Keeps asking until the user types y or n */
-static int read_yes_no(const char *prompt) {
+/* Keeps asking until the user types y or n. Returns 1 for yes, 0 for no. */
+int read_yes_no(const char *prompt) {
     char buf[100];
     while (1) {
         printf("%s", prompt);

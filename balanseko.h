@@ -30,10 +30,11 @@ typedef struct {
 
 /* Function Prototypes*/
 int read_int(const char *prompt, int min, int max); /* validated number input */
+int read_yes_no(const char *prompt); /* returns 1 for y, 0 for n */   
 void init_system(BalanseKoSystem *sys);
 void show_chart(BalanseKoSystem *sys);
 void add_entry(BalanseKoSystem *sys);
-void manage_entries(BalanseKoSystem *sys);          /* Edit / Delete menu */
+void manage_entries(BalanseKoSystem *sys); /* Edit / Delete menu */
 void view_journal(BalanseKoSystem *sys);
 void view_trial_balance(BalanseKoSystem *sys);
 

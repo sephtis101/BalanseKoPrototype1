@@ -4,6 +4,7 @@
 /* Function Prototypes (all of them take the system by pointer = pass by reference) */
 void print_main_menu(void);
 void run_choice(BalanseKoSystem *sys, int choice);
+void stay_in_option(BalanseKoSystem *sys, int choice);
 void run_main_menu(BalanseKoSystem *sys);
 
 int main() {
@@ -45,6 +46,16 @@ void run_choice(BalanseKoSystem *sys, int choice) {
     }
 }
 
+/* Process: stays inside the chosen menu until the user agrees to go back */
+void stay_in_option(BalanseKoSystem *sys, int choice) {
+    int go_back = 0;
+
+    while(go_back == 0) {
+        run_choice(sys, choice);
+        go_back = read_yes_no("\nReturn to main menu? (y/n): ");
+    }
+}
+
 void run_main_menu(BalanseKoSystem *sys) {
     int choice = -1;
 
@@ -55,9 +66,7 @@ void run_main_menu(BalanseKoSystem *sys) {
         if (choice == 0) {
             printf("Thank you for using BalanseKo Services developed by Accounting Divas.\n");
         } else {
-            run_choice(sys, choice);
+            stay_in_option(sys, choice);
         }
     }
 }
-
-
