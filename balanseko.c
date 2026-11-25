@@ -220,47 +220,46 @@ void view_journal(BalanseKoSystem *sys) {
 
 /* ---------- EDIT / DELETE MENU ---------- */
 
+/* Does ONE edit or ONE delete, then returns (main.c asks if the user wants to stay) */
 void manage_entries(BalanseKoSystem *sys) {
     int choice, num;
 
-    do {
-        printf("\n--- EDIT / DELETE JOURNAL ENTRY ---\n");
-        printf(" 1. Edit an entry\n");
-        printf(" 2. Delete an entry\n");
-        printf(" 0. Back to main menu\n");
-        choice = read_int("Choice: ", 0, 2);
+    printf("\n--- EDIT / DELETE JOURNAL ENTRY ---\n");
+    printf(" 1. Edit an entry\n");
+    printf(" 2. Delete an entry\n");
+    printf(" 0. Cancel\n");
+    choice = read_int("Choice: ", 0, 2);
 
-        if (choice == 0) break;
+    if (choice == 0) return;
 
-        if (sys->entry_count == 0) {
-            printf("No entries yet.\n");
-            continue;
-        }
+    if (sys->entry_count == 0) {
+        printf("No entries yet.\n");
+        return;
+    }
 
-        view_journal(sys);
-        num = read_int("\nEntry number: ", 1, sys->entry_count);
+    view_journal(sys);
+    num = read_int("\nEntry number: ", 1, sys->entry_count);
 
-        if (choice == 1) {
-            JournalEntry temp;
-            printf("\nEnter the new details for entry #%d:\n", num);
-            if (input_entry(sys, &temp)) {
-                sys->entries[num - 1] = temp;
-                printf("Entry #%d updated successfully!\n", num);
-            } else {
-                printf("No changes made.\n");
-            }
+    if (choice == 1) {
+        JournalEntry temp;
+        printf("\nEnter the new details for entry #%d:\n", num);
+        if (input_entry(sys, &temp)) {
+            sys->entries[num - 1] = temp;
+            printf("Entry #%d updated successfully!\n", num);
         } else {
-            if (read_yes_no("Are you sure you want to delete this entry? (y/n): ")) {
-                for (int i = num - 1; i < sys->entry_count - 1; i++) {
-                    sys->entries[i] = sys->entries[i + 1];
-                }
-                sys->entry_count--;
-                printf("Entry deleted.\n");
-            } else {
-                printf("Delete cancelled.\n");
-            }
+            printf("No changes made.\n");
         }
-    } while (choice != 0);
+    } else {
+        if (read_yes_no("Are you sure you want to delete this entry? (y/n): ")) {
+            for (int i = num - 1; i < sys->entry_count - 1; i++) {
+                sys->entries[i] = sys->entries[i + 1];
+            }
+            sys->entry_count--;
+            printf("Entry deleted.\n");
+        } else {
+            printf("Delete cancelled.\n");
+        }
+    } 
 }
 
 /* ---------- TRIAL BALANCE ---------- */
