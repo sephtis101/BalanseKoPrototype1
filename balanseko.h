@@ -39,5 +39,7 @@ void view_journal(BalanseKoSystem *sys);
 void view_trial_balance(BalanseKoSystem *sys);
 void view_income_statement(BalanseKoSystem *sys);
 void view_balance_sheet(BalanseKoSystem *sys);
+void save_data(BalanseKoSystem *sys);
+void load_data(BalanseKoSystem *sys);
 
 #endif

@@ -11,6 +11,7 @@ int main() {
     BalanseKoSystem sys;
 
     init_system(&sys);
+    load_data(&sys);  /* Load existing file on start */  
     run_main_menu(&sys);  /* The whole program runs inside this function */
 
     return 0;
@@ -33,7 +34,7 @@ void print_main_menu(void) {
     printf(" 5. View Trial Balance\n");
     printf(" 6. View Income Statement\n");
     printf(" 7. View Balance Sheet\n");
-    printf(" 0. Exit\n");
+    printf(" 0. Save and Exit\n");
     printf("----------------------------------------------------------\n");
 }
 
@@ -68,6 +69,7 @@ void run_main_menu(BalanseKoSystem *sys) {
         choice = read_int("Choice: ", 0, 7);
 
         if (choice == 0) {
+            save_data(sys);
             printf("Thank you for using BalanseKo Services developed by Accounting Divas.\n");
         } else {
             stay_in_option(sys, choice);

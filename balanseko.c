@@ -363,3 +363,40 @@ void view_balance_sheet(BalanseKoSystem *sys) {
     printf("------------------------------------------------\n");
     printf("%-27s %20lld\n", "TOTAL LIABILITIES + EQUITY", total_liabilities + total_equity);
 }
+
+/* ---------- FILE ---------- */
+void save_data(BalanseKoSystem *sys) {
+    FILE *fp = fopen("journal.txt", "w");
+    if (fp == NULL) {
+        printf("Warning: could not save journal.txt!\n");
+        return;
+    }
+
+    fprintf(fp, "%d\n", sys->entry_count);
+    for (int i = 0; i < sys->entry_count; i++) {
+        JournalEntry e = sys->entries[i];
+        fprintf(fp, "%d %d %d\n", e.month, e.day, e.year);
+        fprintf(fp, "%s\n", e.description);
+        fprintf(fp, "%d %lld %d %lld\n", e.debit_code, e.debit_amount, e.credit_code, e.credit_amount);
+    }
+    fclose(fp);
+}
+
+void load_data(BalanseKoSystem *sys) {
+    FILE *fp = fopen("journal.txt", "r");
+    if (fp == NULL) return; /*File doesn't exist yet*/
+
+    if (fscanf(fp, "%d", &sys->entry_count) != 1 ||
+        sys->entry_count < 0 || sys->entry_count > MAX_ENTRIES) {
+        sys->entry_count = 0; /*Bad file: start empty*/
+        fclose(fp);
+        return;
+    }
+    for (int i = 0; i < sys->entry_count; i++) {
+        JournalEntry *e = &sys->entries[i];
+        fscanf(fp, "%d %d %d\n", &e->month, &e->day, &e->year);
+        fscanf(fp, " %49[^\n]\n", e->description);
+        fscanf(fp, "%d %lld %d %lld\n", &e->debit_code, &e->debit_amount, &e->credit_code, &e->credit_amount);
+    }
+    fclose(fp);
+}
