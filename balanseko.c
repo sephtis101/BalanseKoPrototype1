@@ -394,9 +394,12 @@ void load_data(BalanseKoSystem *sys) {
     }
     for (int i = 0; i < sys->entry_count; i++) {
         JournalEntry *e = &sys->entries[i];
-        fscanf(fp, "%d %d %d\n", &e->month, &e->day, &e->year);
-        fscanf(fp, " %49[^\n]\n", e->description);
-        fscanf(fp, "%d %lld %d %lld\n", &e->debit_code, &e->debit_amount, &e->credit_code, &e->credit_amount);
-    }
-    fclose(fp);
-}
+        int ok = fscanf(fp, "%d %d %d\n", &e->month, &e->day, &e->year) == 3
+              && fscanf(fp, " %49[^\n]\n", e->description) == 1
+              && fscanf(fp, "%d %lld %d %lld\n", &e->debit_code, &e->debit_amount, 
+                        &e->credit_code, &e->credit_amount) == 4;
+        if (!ok) {
+        sys->entry_count = i;
+            break;
+        } 
+}   
