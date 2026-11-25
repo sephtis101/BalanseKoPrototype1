@@ -289,3 +289,77 @@ void view_trial_balance(BalanseKoSystem *sys) {
     printf("--------------------------------------------------------------\n");
     printf("%-20s | %-18lld | %-18lld\n", "TOTAL", total_debits, total_credits);
 }
+
+/* ---------- FINANCIAL STATEMENTS ---------- */
+/* Account types by first digit of the code:
+   1 = Assets, 2 = Liabilities, 3 = Equity, 4 = Revenue, 5 = Expenses */
+
+/* Adds up the balances of one account type (prints nothing) */
+static long long section_total(BalanseKoSystem *sys, int type) {
+    long long total = 0;
+
+    for (int i = 0; i < 9; i++) {
+        if (sys->chart[i].code / 100 == type) {
+            total += account_balance(sys, i);
+        }
+    }
+    return total;
+}
+
+/* Prints each account of one account type, one per line */
+static void print_section(BalanseKoSystem *sys, int type) {
+    for (int i = 0; i < 9; i++) {
+        if (sys->chart[i].code / 100 == type) {
+            printf("  %-25s %20lld\n", sys->chart[i].name, account_balance(sys, i));
+        }
+    }
+}
+
+void view_income_statement(BalanseKoSystem *sys) {
+    long long total_revenue  = section_total(sys, 4);
+    long long total_expenses = section_total(sys, 5);
+    long long net_income     = total_revenue - total_expenses;
+
+    printf("\n--- INCOME STATEMENT ---\n");
+
+    printf("Revenue\n");
+    print_section(sys, 4);
+    printf("%-27s %20lld\n", "Total Revenue", total_revenue);
+
+    printf("\nExpenses\n");
+    print_section(sys, 5);
+    printf("%-27s %20lld\n", "Total Expenses", total_expenses);
+
+    printf("------------------------------------------------\n");
+    if (net_income >= 0) {
+        printf("%-27s %20lld\n", "NET INCOME", net_income);
+    } else {
+        printf("%-27s %20lld\n", "NET LOSS", -net_income);
+    }
+}
+
+void view_balance_sheet(BalanseKoSystem *sys) {
+    long long total_assets      = section_total(sys, 1);
+    long long total_liabilities = section_total(sys, 2);
+    long long net_income        = section_total(sys, 4) - section_total(sys, 5);
+    /* Net income is added to equity because we do not do closing entries */
+    long long total_equity      = section_total(sys, 3) + net_income;
+
+    printf("\n--- BALANCE SHEET ---\n");
+
+    printf("Assets\n");
+    print_section(sys, 1);
+    printf("%-27s %20lld\n", "TOTAL ASSETS", total_assets);
+
+    printf("\nLiabilities\n");
+    print_section(sys, 2);
+    printf("%-27s %20lld\n", "Total Liabilities", total_liabilities);
+
+    printf("\nOwner's Equity\n");
+    print_section(sys, 3);
+    printf("  %-25s %20lld\n", "Net Income (Loss)", net_income);
+    printf("%-27s %20lld\n", "Total Owner's Equity", total_equity);
+
+    printf("------------------------------------------------\n");
+    printf("%-27s %20lld\n", "TOTAL LIABILITIES + EQUITY", total_liabilities + total_equity);
+}

@@ -31,6 +31,8 @@ void print_main_menu(void) {
     printf(" 3. Edit / Delete Journal Entry\n");
     printf(" 4. View General Journal\n");
     printf(" 5. View Trial Balance\n");
+    printf(" 6. View Income Statement\n");
+    printf(" 7. View Balance Sheet\n");
     printf(" 0. Exit\n");
     printf("----------------------------------------------------------\n");
 }
@@ -43,6 +45,8 @@ void run_choice(BalanseKoSystem *sys, int choice) {
         case 3: manage_entries(sys); break;
         case 4: view_journal(sys); break;
         case 5: view_trial_balance(sys); break;
+        case 6: view_income_statement(sys); break;
+        case 7: view_balance_sheet(sys); break;
     }
 }
 
@@ -61,7 +65,7 @@ void run_main_menu(BalanseKoSystem *sys) {
 
     while (choice != 0) {
         print_main_menu();
-        choice = read_int("Choice: ", 0, 5);
+        choice = read_int("Choice: ", 0, 7);
 
         if (choice == 0) {
             printf("Thank you for using BalanseKo Services developed by Accounting Divas.\n");

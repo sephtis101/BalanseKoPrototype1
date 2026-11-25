@@ -37,5 +37,7 @@ void add_entry(BalanseKoSystem *sys);
 void manage_entries(BalanseKoSystem *sys); /* Edit / Delete menu */
 void view_journal(BalanseKoSystem *sys);
 void view_trial_balance(BalanseKoSystem *sys);
+void view_income_statement(BalanseKoSystem *sys);
+void view_balance_sheet(BalanseKoSystem *sys);
 
 #endif
