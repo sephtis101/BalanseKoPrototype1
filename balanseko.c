@@ -89,9 +89,9 @@ static long long account_balance(BalanseKoSystem *sys, int i) {
     long long debit = 0;
     long long credit = 0;
 
-    for (int j = 9; j < sys->entry_count; j++) {
+    for (int j = 0; j < sys->entry_count; j++) {
         if (sys->entries[j].debit_code == code) debit += sys->entries[j].debit_amount;
-        if (sys->entries[j].credit_code == code) debit += sys->entries[j].credit_amount;
+        if (sys->entries[j].credit_code == code) credit += sys->entries[j].credit_amount;
     }
 
     if (sys->chart[i].is_debit_normal == 1) return debit - credit;
@@ -180,7 +180,7 @@ static int input_entry(BalanseKoSystem *sys, JournalEntry *e) {
     e->credit_amount = read_amount("Credit Amount: ");
 
     if (e->debit_amount != e->credit_amount) {
-        printf("Error: Debits (%.lld) must equal Credits (%.lld). Entry cancelled.\n",
+        printf("Error: Debits (%lld) must equal Credits (%lld). Entry cancelled.\n",
                e->debit_amount, e->credit_amount);
         return 0;
     }
@@ -213,8 +213,8 @@ void view_journal(BalanseKoSystem *sys) {
     for (int i = 0; i < sys->entry_count; i++) {
         JournalEntry e = sys->entries[i];
         printf("\n#%d | Date: %02d/%02d/%04d | Desc: %s\n", i + 1, e.month, e.day, e.year, e.description);
-        printf("  Debit:  %s - %.lld\n", get_account_name(sys, e.debit_code), e.debit_amount);
-        printf("  Credit: %s - %.lld\n", get_account_name(sys, e.credit_code), e.credit_amount);
+        printf("  Debit:  %s - %lld\n", get_account_name(sys, e.debit_code), e.debit_amount);
+        printf("  Credit: %s - %lld\n", get_account_name(sys, e.credit_code), e.credit_amount);
     }
 }
 
@@ -269,7 +269,7 @@ void view_trial_balance(BalanseKoSystem *sys) {
     long long total_credits = 0;
 
     printf("\n--- TRIAL BALANCE ---\n");
-    printf("%-20s | %-10s | %-10s\n", "Account", "Debit", "Credit");
+    printf("%-20s | %-18s | %-18s\n", "Account", "Debit", "Credit");
     printf("--------------------------------------------------------------\n");
 
     for (int i = 0; i < 9; i++) {
@@ -399,8 +399,9 @@ void load_data(BalanseKoSystem *sys) {
               && fscanf(fp, "%d %lld %d %lld\n", &e->debit_code, &e->debit_amount, 
                         &e->credit_code, &e->credit_amount) == 4;
         if (!ok) {
-        sys->entry_count = i;
+            sys->entry_count = i;
             break;
         } 
-    }   
+    } 
+    fclose(fp);
 }
