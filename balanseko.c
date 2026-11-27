@@ -402,4 +402,5 @@ void load_data(BalanseKoSystem *sys) {
         sys->entry_count = i;
             break;
         } 
-}   
+    }   
+}
