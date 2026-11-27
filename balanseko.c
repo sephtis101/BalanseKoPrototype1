@@ -365,10 +365,57 @@ void view_balance_sheet(BalanseKoSystem *sys) {
 }
 
 /* ---------- FILE ---------- */
+
+/* Builds the file name of journal number n, for example "journal_3.txt" (out needs 30 characters) */
+static void journal_name(int n, char *out) {
+    snprintf(out, 30, "journal_%d.txt", n);
+}
+
+/* Returns 1 if journal number n has a saved file */
+static int journal_exists(int n) {
+    char name[30];
+    journal_name(n, name);
+
+    FILE *fp = fopen(name, "r");
+    if (fp == NULL) return 0;
+    fclose(fp);
+    return 1;
+}
+
+/* Prints the saved journals and returns how many there are */
+int show_journals(void) {
+    int count = 0;
+
+    printf("\n--- SAVED JOURNALS ---\n");
+    for (int n = 1; n <= MAX_JOURNALS; n++) {
+        if (journal_exists(n)) {
+            printf(" %d. journal_%d.txt\n", n, n);
+            count++;
+        }
+    }
+    return count;
+}
+
+/* Starts an empty journal with the first number that has no file yet.
+   Returns 0 if all numbers are already used. */
+int new_journal(BalanseKoSystem *sys) {
+    for (int n = 1; n <= MAX_JOURNALS; n++) {
+        if (!journal_exists(n)) {
+            sys->journal_number = n;
+            sys->entry_count = 0;
+            return 1;
+        }
+    }
+    return 0;
+}
+
 void save_data(BalanseKoSystem *sys) {
-    FILE *fp = fopen("journal.txt", "w");
+    char name[30];
+    journal_name(sys->journal_number, name);
+
+    FILE *fp = fopen(name, "w");
     if (fp == NULL) {
-        printf("Warning: could not save journal.txt!\n");
+        printf("Warning: could not save %s!\n", name);
         return;
     }
 
@@ -380,28 +427,35 @@ void save_data(BalanseKoSystem *sys) {
         fprintf(fp, "%d %lld %d %lld\n", e.debit_code, e.debit_amount, e.credit_code, e.credit_amount);
     }
     fclose(fp);
+    printf("Journal saved to %s.\n", name);
 }
 
-void load_data(BalanseKoSystem *sys) {
-    FILE *fp = fopen("journal.txt", "r");
-    if (fp == NULL) return; /*File doesn't exist yet*/
+/* Loads journal number n. Returns 1 if it was loaded, 0 if the file does not exist. */
+int load_data(BalanseKoSystem *sys, int n) {
+    char name[30];
+    journal_name(n, name);
 
+    FILE *fp = fopen(name, "r");
+    if (fp == NULL) return 0; /*File doesn't exist*/
+
+    sys->journal_number = n;
     if (fscanf(fp, "%d", &sys->entry_count) != 1 ||
         sys->entry_count < 0 || sys->entry_count > MAX_ENTRIES) {
         sys->entry_count = 0; /*Bad file: start empty*/
         fclose(fp);
-        return;
+        return 1;
     }
     for (int i = 0; i < sys->entry_count; i++) {
         JournalEntry *e = &sys->entries[i];
         int ok = fscanf(fp, "%d %d %d\n", &e->month, &e->day, &e->year) == 3
               && fscanf(fp, " %49[^\n]\n", e->description) == 1
-              && fscanf(fp, "%d %lld %d %lld\n", &e->debit_code, &e->debit_amount, 
+              && fscanf(fp, "%d %lld %d %lld\n", &e->debit_code, &e->debit_amount,
                         &e->credit_code, &e->credit_amount) == 4;
         if (!ok) {
             sys->entry_count = i;
             break;
-        } 
-    } 
+        }
+    }
     fclose(fp);
+    return 1;
 }

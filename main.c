@@ -2,6 +2,9 @@
 #include "balanseko.h"
 
 /* Function Prototypes (all of them take the system by pointer = pass by reference) */
+void choose_start(BalanseKoSystem *sys);
+int load_previous(BalanseKoSystem *sys);
+int start_new(BalanseKoSystem *sys);
 void print_main_menu(void);
 void run_choice(BalanseKoSystem *sys, int choice);
 void stay_in_option(BalanseKoSystem *sys, int choice);
@@ -11,10 +14,60 @@ int main() {
     BalanseKoSystem sys;
 
     init_system(&sys);
-    load_data(&sys);  /* Load existing file on start */  
+    choose_start(&sys);   /* Ask: load a previous journal or start a new one */
     run_main_menu(&sys);  /* The whole program runs inside this function */
 
     return 0;
+}
+
+/* Option 1: shows the saved journals and loads the one the user picks.
+   Returns 1 if a journal was loaded, 0 to go back to the start menu. */
+int load_previous(BalanseKoSystem *sys) {
+    int number;
+
+    if (show_journals() == 0) {
+        printf("No saved journals found.\n");
+        return 0;
+    }
+
+    number = read_int("Journal number to load (0 to go back): ", 0, MAX_JOURNALS);
+    while (number != 0 && load_data(sys, number) == 0) {
+        printf("Journal %d was not found. Choose one from the list.\n", number);
+        number = read_int("Journal number to load (0 to go back): ", 0, MAX_JOURNALS);
+    }
+    if (number == 0) return 0;
+
+    printf("Journal %d loaded (%d entries).\n", number, sys->entry_count);
+    return 1;
+}
+
+/* Option 2: starts an empty journal with the next free number.
+   Returns 1 if it started, 0 if there is no free number left. */
+int start_new(BalanseKoSystem *sys) {
+    if (new_journal(sys) == 0) {
+        printf("Journal limit reached (%d). Delete an old journal file first.\n", MAX_JOURNALS);
+        return 0;
+    }
+    printf("Starting new journal %d (it will be saved as journal_%d.txt).\n",
+           sys->journal_number, sys->journal_number);
+    return 1;
+}
+
+/* Process: asks whether to load a previous journal or start a new one */
+void choose_start(BalanseKoSystem *sys) {
+    int started = 0;
+
+    while (started == 0) {
+        printf("\n--- START ---\n");
+        printf(" 1. Load a previous journal\n");
+        printf(" 2. Start a new journal\n");
+
+        if (read_int("Choice: ", 1, 2) == 1) {
+            started = load_previous(sys);
+        } else {
+            started = start_new(sys);
+        }
+    }
 }
 
 /* Output: shows the main menu */

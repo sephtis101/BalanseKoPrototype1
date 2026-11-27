@@ -3,6 +3,7 @@
 
 #define MAX_ENTRIES 200
 #define MAX_AMOUNT 1000000000000000LL
+#define MAX_JOURNALS 99
 
 /* Fixed Account Structure*/
 typedef struct {
@@ -26,6 +27,7 @@ typedef struct {
     Account chart[9];
     JournalEntry entries[MAX_ENTRIES];
     int entry_count;
+    int journal_number;
 } BalanseKoSystem;
 
 /* Function Prototypes*/
@@ -40,6 +42,8 @@ void view_trial_balance(BalanseKoSystem *sys);
 void view_income_statement(BalanseKoSystem *sys);
 void view_balance_sheet(BalanseKoSystem *sys);
 void save_data(BalanseKoSystem *sys);
-void load_data(BalanseKoSystem *sys);
+int show_journals(void);
+int new_journal(BalanseKoSystem *sys);
+int load_data(BalanseKoSystem *sys, int n);
 
 #endif
